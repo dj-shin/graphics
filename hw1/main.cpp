@@ -19,6 +19,7 @@ using namespace glm;
 #include <common/texture.hpp>
 #include <common/controls.hpp>
 #include <common/objloader.hpp>
+#include "shader/shader_source.hpp"
 
 int main( void )
 {
@@ -57,7 +58,7 @@ int main( void )
 
   // Ensure we can capture the escape key being pressed below
   glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
-  // Hide the mouse and enable unlimited mouvement
+  // Hide the mouse and enable unlimited movement
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
   // Set the mouse at the center of the screen
@@ -80,7 +81,7 @@ int main( void )
   glBindVertexArray(VertexArrayID);
 
   // Create and compile our GLSL program from the shaders
-  GLuint programID = LoadShaders( "TransformVertexShader.vertexshader", "TextureFragmentShader.fragmentshader" );
+  GLuint programID = LoadShadersSource( VertexShaderCode, FragmentShaderCode );
 
   // Get a handle for our "MVP" uniform
   GLuint MatrixID = glGetUniformLocation(programID, "MVP");

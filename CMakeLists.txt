@@ -45,16 +45,6 @@ add_definitions(
 
 aux_source_directory(common COMMON_SOURCES)
 
-add_executable(embedfile utility/embedfile.cpp)
-
-set(SHADER_DIR hw1/shader)
-
-add_custom_command(
-        OUTPUT  ${CMAKE_BINARY_DIR}/fragmentshader.h
-        COMMAND embedfile TextureFragmentShader ${SHADER_DIR}/TextureFragmentShader.fragmentshader ${CMAKE_BINARY_DIR}/fragmentshader.h
-        DEPENDS ${SHADER_DIR}/TextureFragmentShader.fragmentshader
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
-
 add_executable(hw1
         hw1/main.cpp
         ${COMMON_SOURCES}
