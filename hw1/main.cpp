@@ -36,9 +36,9 @@ int main( void )
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
   // Open a window and create its OpenGL context
-  window = glfwCreateWindow( 1024, 768, "Tutorial 08 - Basic Shading", NULL, NULL);
+  window = glfwCreateWindow( 1024, 768, "Graphics hw1", NULL, NULL);
   if( window == NULL ){
-    fprintf( stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials.\n" );
+    fprintf( stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible.\n" );
     getchar();
     glfwTerminate();
     return -1;
@@ -191,25 +191,26 @@ int main( void )
   glUseProgram(programID);
   GLuint LightID = glGetUniformLocation(programID, "LightPosition_worldspace");
 
+  double initTime = glfwGetTime();
   do{
-
+    float elapsedTime = float(glfwGetTime() - initTime);
     // Clear the screen
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Use our shader
     glUseProgram(programID);
 
-    // Compute the MVP matrix from keyboard and mouse input
+    // Compute the BodyMVP matrix from keyboard and mouse input
     computeMatricesFromInputs();
     glm::mat4 ProjectionMatrix = getProjectionMatrix();
     glm::mat4 ViewMatrix = getViewMatrix();
-    glm::mat4 ModelMatrix = glm::mat4(1.0);
-    glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
+    glm::mat4 BodyModelMatrix = glm::mat4(1.0);
+    glm::mat4 BodyMVP = ProjectionMatrix * ViewMatrix * BodyModelMatrix;
 
     // Send our transformation to the currently bound shader,
-    // in the "MVP" uniform
-    glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
-    glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
+    // in the "BodyMVP" uniform
+    glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &BodyMVP[0][0]);
+    glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &BodyModelMatrix[0][0]);
     glUniformMatrix4fv(ViewMatrixID, 1, GL_FALSE, &ViewMatrix[0][0]);
 
     glm::vec3 lightPos = glm::vec3(6,8,0);
@@ -224,6 +225,12 @@ int main( void )
     glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0 );
     glDrawArrays(GL_TRIANGLES, 0, body_vertices.size() );
 
+    glm::mat4 RWing1ModelMatrix = glm::translate(glm::mat4(1.0), glm::vec3(0.13f, 0.84f, 0.46f))
+                                  * glm::rotate(glm::mat4(1.0), 0.3f * sin(5.0f * elapsedTime), glm::vec3(0,0,1))
+                                  * glm::translate(glm::mat4(1.0), glm::vec3(-0.13f, -0.84f, -0.46f));
+    glm::mat4 RWing1MVP = ProjectionMatrix * ViewMatrix * RWing1ModelMatrix;
+    glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &RWing1MVP[0][0]);
+    glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &RWing1ModelMatrix[0][0]);
     // Right wing 1
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, rwing1_vertexbuffer);
@@ -233,6 +240,13 @@ int main( void )
     glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0 );
     glDrawArrays(GL_TRIANGLES, 0, rwing1_vertices.size() );
 
+    glm::mat4 RWing2ModelMatrix = glm::translate(glm::mat4(1.0), glm::vec3(0.0f, 0.0f, 0.97f))
+                                  * glm::rotate(glm::mat4(1.0), -0.3f * sin(5.0f * elapsedTime), glm::vec3(0,1,0))
+                                  * glm::translate(glm::mat4(1.0), glm::vec3(0.0f, 0.0f, -0.97f))
+                                  * RWing1ModelMatrix;
+    glm::mat4 RWing2MVP = ProjectionMatrix * ViewMatrix * RWing2ModelMatrix;
+    glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &RWing2MVP[0][0]);
+    glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &RWing2ModelMatrix[0][0]);
     // Right wing 2
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, rwing2_vertexbuffer);
@@ -241,6 +255,14 @@ int main( void )
     glBindBuffer(GL_ARRAY_BUFFER, rwing2_normalbuffer);
     glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0 );
     glDrawArrays(GL_TRIANGLES, 0, rwing2_vertices.size() );
+
+    glm::mat4 RWing3ModelMatrix = glm::translate(glm::mat4(1.0), glm::vec3(-0.18f, -0.0f, 1.79f))
+                                  * glm::rotate(glm::mat4(1.0), 0.2f * sin(5.0f * elapsedTime), glm::vec3(0,1,0))
+                                  * glm::translate(glm::mat4(1.0), glm::vec3(0.18f, 0.0f, -1.79f))
+                                  * RWing2ModelMatrix;
+    glm::mat4 RWing3MVP = ProjectionMatrix * ViewMatrix * RWing3ModelMatrix;
+    glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &RWing3MVP[0][0]);
+    glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &RWing3ModelMatrix[0][0]);
 
     // Right wing 3
     glEnableVertexAttribArray(0);
@@ -251,6 +273,12 @@ int main( void )
     glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0 );
     glDrawArrays(GL_TRIANGLES, 0, rwing3_vertices.size() );
 
+    glm::mat4 LWing1ModelMatrix = glm::translate(glm::mat4(1.0), glm::vec3(0.13f, 0.84f, -0.46f))
+                                  * glm::rotate(glm::mat4(1.0), 0.3f * sin(5.0f * elapsedTime), glm::vec3(0,0,1))
+                                  * glm::translate(glm::mat4(1.0), glm::vec3(-0.13f, -0.84f, 0.46f));
+    glm::mat4 LWing1MVP = ProjectionMatrix * ViewMatrix * LWing1ModelMatrix;
+    glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &LWing1MVP[0][0]);
+    glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &LWing1ModelMatrix[0][0]);
     // Left wing 1
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, lwing1_vertexbuffer);
@@ -260,6 +288,13 @@ int main( void )
     glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0 );
     glDrawArrays(GL_TRIANGLES, 0, lwing1_vertices.size() );
 
+    glm::mat4 LWing2ModelMatrix = glm::translate(glm::mat4(1.0), glm::vec3(0.0f, 0.0f, -0.97f))
+                                  * glm::rotate(glm::mat4(1.0), 0.2f * sin(5.0f * elapsedTime), glm::vec3(0,1,0))
+                                  * glm::translate(glm::mat4(1.0), glm::vec3(0.0f, 0.0f, 0.97f))
+                                  * LWing1ModelMatrix;
+    glm::mat4 LWing2MVP = ProjectionMatrix * ViewMatrix * LWing2ModelMatrix;
+    glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &LWing2MVP[0][0]);
+    glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &LWing2ModelMatrix[0][0]);
     // Left wing 2
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, lwing2_vertexbuffer);
@@ -269,6 +304,13 @@ int main( void )
     glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0 );
     glDrawArrays(GL_TRIANGLES, 0, lwing2_vertices.size() );
 
+    glm::mat4 LWing3ModelMatrix = glm::translate(glm::mat4(1.0), glm::vec3(-0.18f, -0.0f, -1.79f))
+                                  * glm::rotate(glm::mat4(1.0), -0.3f * sin(5.0f * elapsedTime), glm::vec3(0,1,0))
+                                  * glm::translate(glm::mat4(1.0), glm::vec3(0.18f, 0.0f, 1.79f))
+                                  * LWing2ModelMatrix;
+    glm::mat4 LWing3MVP = ProjectionMatrix * ViewMatrix * LWing3ModelMatrix;
+    glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &LWing3MVP[0][0]);
+    glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &LWing3ModelMatrix[0][0]);
     // Left wing 3
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, lwing3_vertexbuffer);
