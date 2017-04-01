@@ -16,10 +16,8 @@ GLFWwindow* window;
 using namespace glm;
 
 #include <common/shader.hpp>
-#include <common/texture.hpp>
 #include <common/controls.hpp>
 #include <common/objloader.hpp>
-#include "shader/shader_source.hpp"
 
 int main( void )
 {
@@ -38,7 +36,7 @@ int main( void )
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
   // Open a window and create its OpenGL context
-  window = glfwCreateWindow( 1024, 768, "Tutorial 07 - Model Loading", NULL, NULL);
+  window = glfwCreateWindow( 1024, 768, "Tutorial 08 - Basic Shading", NULL, NULL);
   if( window == NULL ){
     fprintf( stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials.\n" );
     getchar();
@@ -66,7 +64,7 @@ int main( void )
   glfwSetCursorPos(window, 1024/2, 768/2);
 
   // Dark blue background
-  glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
+  glClearColor(0.2f, 0.2f, 0.2f, 0.0f);
 
   // Enable depth test
   glEnable(GL_DEPTH_TEST);
@@ -81,34 +79,117 @@ int main( void )
   glBindVertexArray(VertexArrayID);
 
   // Create and compile our GLSL program from the shaders
-  GLuint programID = LoadShadersSource( VertexShaderCode, FragmentShaderCode );
+  GLuint programID = LoadShaders( "shader/Basic.vert", "shader/LightShading.frag" );
 
   // Get a handle for our "MVP" uniform
   GLuint MatrixID = glGetUniformLocation(programID, "MVP");
-
-  // Load the texture
-  GLuint Texture = loadDDS("uvmap.DDS");
-
-  // Get a handle for our "myTextureSampler" uniform
-  GLuint TextureID  = glGetUniformLocation(programID, "myTextureSampler");
+  GLuint ViewMatrixID = glGetUniformLocation(programID, "V");
+  GLuint ModelMatrixID = glGetUniformLocation(programID, "M");
 
   // Read our .obj file
-  std::vector<glm::vec3> vertices;
-  std::vector<glm::vec2> uvs;
-  std::vector<glm::vec3> normals; // Won't be used at the moment.
-  bool res = loadOBJ("cube.obj", vertices, uvs, normals);
+  std::vector<glm::vec3> body_vertices;
+  std::vector<glm::vec3> body_normals;
+  loadOBJ("model/body.obj", body_vertices, body_normals);
+
+  std::vector<glm::vec3> rwing1_vertices;
+  std::vector<glm::vec3> rwing1_normals;
+  loadOBJ("model/rwing1.obj", rwing1_vertices, rwing1_normals);
+
+  std::vector<glm::vec3> rwing2_vertices;
+  std::vector<glm::vec3> rwing2_normals;
+  loadOBJ("model/rwing2.obj", rwing2_vertices, rwing2_normals);
+
+  std::vector<glm::vec3> rwing3_vertices;
+  std::vector<glm::vec3> rwing3_normals;
+  loadOBJ("model/rwing3.obj", rwing3_vertices, rwing3_normals);
+
+  std::vector<glm::vec3> lwing1_vertices;
+  std::vector<glm::vec3> lwing1_normals;
+  loadOBJ("model/lwing1.obj", lwing1_vertices, lwing1_normals);
+
+  std::vector<glm::vec3> lwing2_vertices;
+  std::vector<glm::vec3> lwing2_normals;
+  loadOBJ("model/lwing2.obj", lwing2_vertices, lwing2_normals);
+
+  std::vector<glm::vec3> lwing3_vertices;
+  std::vector<glm::vec3> lwing3_normals;
+  loadOBJ("model/lwing3.obj", lwing3_vertices, lwing3_normals);
 
   // Load it into a VBO
 
-  GLuint vertexbuffer;
-  glGenBuffers(1, &vertexbuffer);
-  glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-  glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
+  GLuint body_vertexbuffer;
+  glGenBuffers(1, &body_vertexbuffer);
+  glBindBuffer(GL_ARRAY_BUFFER, body_vertexbuffer);
+  glBufferData(GL_ARRAY_BUFFER, body_vertices.size() * sizeof(glm::vec3), &body_vertices[0], GL_STATIC_DRAW);
 
-  GLuint uvbuffer;
-  glGenBuffers(1, &uvbuffer);
-  glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
-  glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
+  GLuint body_normalbuffer;
+  glGenBuffers(1, &body_normalbuffer);
+  glBindBuffer(GL_ARRAY_BUFFER, body_normalbuffer);
+  glBufferData(GL_ARRAY_BUFFER, body_normals.size() * sizeof(glm::vec3), &body_normals[0], GL_STATIC_DRAW);
+
+  GLuint rwing1_vertexbuffer;
+  glGenBuffers(1, &rwing1_vertexbuffer);
+  glBindBuffer(GL_ARRAY_BUFFER, rwing1_vertexbuffer);
+  glBufferData(GL_ARRAY_BUFFER, rwing1_vertices.size() * sizeof(glm::vec3), &rwing1_vertices[0], GL_STATIC_DRAW);
+
+  GLuint rwing1_normalbuffer;
+  glGenBuffers(1, &rwing1_normalbuffer);
+  glBindBuffer(GL_ARRAY_BUFFER, rwing1_normalbuffer);
+  glBufferData(GL_ARRAY_BUFFER, rwing1_normals.size() * sizeof(glm::vec3), &rwing1_normals[0], GL_STATIC_DRAW);
+
+  GLuint rwing2_vertexbuffer;
+  glGenBuffers(1, &rwing2_vertexbuffer);
+  glBindBuffer(GL_ARRAY_BUFFER, rwing2_vertexbuffer);
+  glBufferData(GL_ARRAY_BUFFER, rwing2_vertices.size() * sizeof(glm::vec3), &rwing2_vertices[0], GL_STATIC_DRAW);
+
+  GLuint rwing2_normalbuffer;
+  glGenBuffers(1, &rwing2_normalbuffer);
+  glBindBuffer(GL_ARRAY_BUFFER, rwing2_normalbuffer);
+  glBufferData(GL_ARRAY_BUFFER, rwing2_normals.size() * sizeof(glm::vec3), &rwing2_normals[0], GL_STATIC_DRAW);
+
+  GLuint rwing3_vertexbuffer;
+  glGenBuffers(1, &rwing3_vertexbuffer);
+  glBindBuffer(GL_ARRAY_BUFFER, rwing3_vertexbuffer);
+  glBufferData(GL_ARRAY_BUFFER, rwing3_vertices.size() * sizeof(glm::vec3), &rwing3_vertices[0], GL_STATIC_DRAW);
+
+  GLuint rwing3_normalbuffer;
+  glGenBuffers(1, &rwing3_normalbuffer);
+  glBindBuffer(GL_ARRAY_BUFFER, rwing3_normalbuffer);
+  glBufferData(GL_ARRAY_BUFFER, rwing3_normals.size() * sizeof(glm::vec3), &rwing3_normals[0], GL_STATIC_DRAW);
+
+  GLuint lwing1_vertexbuffer;
+  glGenBuffers(1, &lwing1_vertexbuffer);
+  glBindBuffer(GL_ARRAY_BUFFER, lwing1_vertexbuffer);
+  glBufferData(GL_ARRAY_BUFFER, lwing1_vertices.size() * sizeof(glm::vec3), &lwing1_vertices[0], GL_STATIC_DRAW);
+
+  GLuint lwing1_normalbuffer;
+  glGenBuffers(1, &lwing1_normalbuffer);
+  glBindBuffer(GL_ARRAY_BUFFER, lwing1_normalbuffer);
+  glBufferData(GL_ARRAY_BUFFER, lwing1_normals.size() * sizeof(glm::vec3), &lwing1_normals[0], GL_STATIC_DRAW);
+
+  GLuint lwing2_vertexbuffer;
+  glGenBuffers(1, &lwing2_vertexbuffer);
+  glBindBuffer(GL_ARRAY_BUFFER, lwing2_vertexbuffer);
+  glBufferData(GL_ARRAY_BUFFER, lwing2_vertices.size() * sizeof(glm::vec3), &lwing2_vertices[0], GL_STATIC_DRAW);
+
+  GLuint lwing2_normalbuffer;
+  glGenBuffers(1, &lwing2_normalbuffer);
+  glBindBuffer(GL_ARRAY_BUFFER, lwing2_normalbuffer);
+  glBufferData(GL_ARRAY_BUFFER, lwing2_normals.size() * sizeof(glm::vec3), &lwing2_normals[0], GL_STATIC_DRAW);
+
+  GLuint lwing3_vertexbuffer;
+  glGenBuffers(1, &lwing3_vertexbuffer);
+  glBindBuffer(GL_ARRAY_BUFFER, lwing3_vertexbuffer);
+  glBufferData(GL_ARRAY_BUFFER, lwing3_vertices.size() * sizeof(glm::vec3), &lwing3_vertices[0], GL_STATIC_DRAW);
+
+  GLuint lwing3_normalbuffer;
+  glGenBuffers(1, &lwing3_normalbuffer);
+  glBindBuffer(GL_ARRAY_BUFFER, lwing3_normalbuffer);
+  glBufferData(GL_ARRAY_BUFFER, lwing3_normals.size() * sizeof(glm::vec3), &lwing3_normals[0], GL_STATIC_DRAW);
+
+  // Get a handle for our "LightPosition" uniform
+  glUseProgram(programID);
+  GLuint LightID = glGetUniformLocation(programID, "LightPosition_worldspace");
 
   do{
 
@@ -128,39 +209,74 @@ int main( void )
     // Send our transformation to the currently bound shader,
     // in the "MVP" uniform
     glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+    glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
+    glUniformMatrix4fv(ViewMatrixID, 1, GL_FALSE, &ViewMatrix[0][0]);
 
-    // Bind our texture in Texture Unit 0
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, Texture);
-    // Set our "myTextureSampler" sampler to user Texture Unit 0
-    glUniform1i(TextureID, 0);
+    glm::vec3 lightPos = glm::vec3(6,8,0);
+    glUniform3f(LightID, lightPos.x, lightPos.y, lightPos.z);
 
-    // 1rst attribute buffer : vertices
+    // Body
     glEnableVertexAttribArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-    glVertexAttribPointer(
-        0,                  // attribute
-        3,                  // size
-        GL_FLOAT,           // type
-        GL_FALSE,           // normalized?
-        0,                  // stride
-        (void*)0            // array buffer offset
-    );
-
-    // 2nd attribute buffer : UVs
+    glBindBuffer(GL_ARRAY_BUFFER, body_vertexbuffer);
+    glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0 );
     glEnableVertexAttribArray(1);
-    glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
-    glVertexAttribPointer(
-        1,                                // attribute
-        2,                                // size
-        GL_FLOAT,                         // type
-        GL_FALSE,                         // normalized?
-        0,                                // stride
-        (void*)0                          // array buffer offset
-    );
+    glBindBuffer(GL_ARRAY_BUFFER, body_normalbuffer);
+    glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0 );
+    glDrawArrays(GL_TRIANGLES, 0, body_vertices.size() );
 
-    // Draw the triangle !
-    glDrawArrays(GL_TRIANGLES, 0, vertices.size() );
+    // Right wing 1
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, rwing1_vertexbuffer);
+    glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0 );
+    glEnableVertexAttribArray(1);
+    glBindBuffer(GL_ARRAY_BUFFER, rwing1_normalbuffer);
+    glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0 );
+    glDrawArrays(GL_TRIANGLES, 0, rwing1_vertices.size() );
+
+    // Right wing 2
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, rwing2_vertexbuffer);
+    glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0 );
+    glEnableVertexAttribArray(1);
+    glBindBuffer(GL_ARRAY_BUFFER, rwing2_normalbuffer);
+    glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0 );
+    glDrawArrays(GL_TRIANGLES, 0, rwing2_vertices.size() );
+
+    // Right wing 3
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, rwing3_vertexbuffer);
+    glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0 );
+    glEnableVertexAttribArray(1);
+    glBindBuffer(GL_ARRAY_BUFFER, rwing3_normalbuffer);
+    glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0 );
+    glDrawArrays(GL_TRIANGLES, 0, rwing3_vertices.size() );
+
+    // Left wing 1
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, lwing1_vertexbuffer);
+    glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0 );
+    glEnableVertexAttribArray(1);
+    glBindBuffer(GL_ARRAY_BUFFER, lwing1_normalbuffer);
+    glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0 );
+    glDrawArrays(GL_TRIANGLES, 0, lwing1_vertices.size() );
+
+    // Left wing 2
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, lwing2_vertexbuffer);
+    glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0 );
+    glEnableVertexAttribArray(1);
+    glBindBuffer(GL_ARRAY_BUFFER, lwing2_normalbuffer);
+    glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0 );
+    glDrawArrays(GL_TRIANGLES, 0, lwing2_vertices.size() );
+
+    // Left wing 3
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, lwing3_vertexbuffer);
+    glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0 );
+    glEnableVertexAttribArray(1);
+    glBindBuffer(GL_ARRAY_BUFFER, lwing3_normalbuffer);
+    glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0 );
+    glDrawArrays(GL_TRIANGLES, 0, lwing3_vertices.size() );
 
     glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);
@@ -174,10 +290,9 @@ int main( void )
          glfwWindowShouldClose(window) == 0 );
 
   // Cleanup VBO and shader
-  glDeleteBuffers(1, &vertexbuffer);
-  glDeleteBuffers(1, &uvbuffer);
+  glDeleteBuffers(1, &body_vertexbuffer);
+  glDeleteBuffers(1, &body_normalbuffer);
   glDeleteProgram(programID);
-  glDeleteTextures(1, &Texture);
   glDeleteVertexArrays(1, &VertexArrayID);
 
   // Close OpenGL window and terminate GLFW
