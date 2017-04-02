@@ -1,0 +1,51 @@
+\documentclass{article}
+\usepackage[left=2.5cm,right=2.5cm,top=3cm,bottom=3cm,a4paper]{geometry}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{indentfirst}
+\usepackage{graphicx}
+\usepackage{float}
+
+\title{Computer Graphics hw1}
+\date{2017-04-03}
+\author{2014-18992 DongJin Shin}
+
+\begin{document}
+	
+\maketitle
+
+\section{Recommended Environment}
+
+\begin{itemize}
+\item Linux
+\item Graphic card supports GLSL $\geq$ 3.3
+\item OpenGL $\geq$ 3.0
+\item C++ $\geq$ 6.3.1
+\item CMake $\geq$ 3.7.2
+\end{itemize}
+
+\section{Execution}
+
+\begin{enumerate}
+\item \verb|mkdir build| (At root directory, where \verb|CMakeLists.txt| is contained)
+\item \verb|cd build|
+\item \verb|cmake ..|
+\item \verb|make|
+\item \verb|cd ../hw1/| (Directory should be correct, since it loads \verb|obj| and shader files in relative path)
+\item \verb|./hw1|
+\end{enumerate}
+
+\section{Controls}
+\begin{itemize}
+\item Mouse move to alter camera direction
+\item Arrow keys to move camera position
+\item ESC to exit
+\end{itemize}
+
+\section{Description}
+This bird has hierarchical model consists of 4 levels: body, upper arm, lower arm, and hand.
+Upper arms flaps the whole wing with rotation around x axis.
+Lower arms moves forwards and backwards.
+Hands also moves forwards and backwards, but in opposite direction of lower arms, maintaining the overall angle.
+
+\end{document}
