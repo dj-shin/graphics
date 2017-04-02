@@ -8,7 +8,6 @@ extern GLFWwindow* window; // The "extern" keyword here is to access the variabl
 using namespace glm;
 
 #include "controls.hpp"
-#include <cstdio>
 
 glm::mat4 ViewMatrix;
 glm::mat4 ProjectionMatrix;
@@ -33,6 +32,12 @@ float initialFoV = 45.0f;
 float speed = 3.0f; // 3 units / second
 float mouseSpeed = 0.003f;
 
+static bool initialized = false;
+static void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos)
+{
+  initialized = true;
+}
+
 void computeMatricesFromInputs(){
 
   // glfwGetTime is called only once, the first time this function is called
@@ -47,12 +52,14 @@ void computeMatricesFromInputs(){
   glfwGetCursorPos(window, &xpos, &ypos);
 
   // Reset mouse position for next frame
+  glfwSetCursorPosCallback(window, cursor_pos_callback);
   glfwSetCursorPos(window, 1024/2, 768/2);
-  if (deltaTime < 0.01) return;
 
-  // Compute new orientation
-  horizontalAngle += mouseSpeed * float(1024/2 - xpos );
-  verticalAngle   += mouseSpeed * float( 768/2 - ypos );
+  if (initialized) {
+    // Compute new orientation
+    horizontalAngle += mouseSpeed * float(1024 / 2 - xpos);
+    verticalAngle += mouseSpeed * float(768 / 2 - ypos);
+  }
 
   // Direction : Spherical coordinates to Cartesian coordinates conversion
   glm::vec3 direction(
@@ -69,8 +76,7 @@ void computeMatricesFromInputs(){
   );
 
   // Up vector
-  // glm::vec3 up = glm::cross( right, direction );
-  glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+  glm::vec3 up = glm::cross( right, direction );
 
   // Move forward
   if (glfwGetKey( window, GLFW_KEY_UP ) == GLFW_PRESS){
