@@ -56,12 +56,10 @@ int main( void )
 
   // Ensure we can capture the escape key being pressed below
   glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
-  // Hide the mouse and enable unlimited movement
-  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+  glfwSetInputMode(window, GLFW_STICKY_MOUSE_BUTTONS, GL_TRUE);
 
   // Set the mouse at the center of the screen
   glfwPollEvents();
-  glfwSetCursorPos(window, 1024/2, 768/2);
 
   // Dark blue background
   glClearColor(0.2f, 0.2f, 0.2f, 0.0f);
@@ -79,7 +77,7 @@ int main( void )
   glBindVertexArray(VertexArrayID);
 
   // Create and compile our GLSL program from the shaders
-  GLuint programID = LoadShaders( "shader/Basic.vert", "shader/LightShading.frag" );
+  GLuint programID = LoadShaders( "/home/lastone817/graphics/hw1/shader/Basic.vert", "/home/lastone817/graphics/hw1/shader/LightShading.frag" );
 
   // Get a handle for our "MVP" uniform
   GLuint MatrixID = glGetUniformLocation(programID, "MVP");
@@ -89,31 +87,31 @@ int main( void )
   // Read our .obj file
   std::vector<glm::vec3> body_vertices;
   std::vector<glm::vec3> body_normals;
-  loadOBJ("model/body.obj", body_vertices, body_normals);
+  loadOBJ("./model/body.obj", body_vertices, body_normals);
 
   std::vector<glm::vec3> rwing1_vertices;
   std::vector<glm::vec3> rwing1_normals;
-  loadOBJ("model/rwing1.obj", rwing1_vertices, rwing1_normals);
+  loadOBJ("./model/rwing1.obj", rwing1_vertices, rwing1_normals);
 
   std::vector<glm::vec3> rwing2_vertices;
   std::vector<glm::vec3> rwing2_normals;
-  loadOBJ("model/rwing2.obj", rwing2_vertices, rwing2_normals);
+  loadOBJ("./model/rwing2.obj", rwing2_vertices, rwing2_normals);
 
   std::vector<glm::vec3> rwing3_vertices;
   std::vector<glm::vec3> rwing3_normals;
-  loadOBJ("model/rwing3.obj", rwing3_vertices, rwing3_normals);
+  loadOBJ("./model/rwing3.obj", rwing3_vertices, rwing3_normals);
 
   std::vector<glm::vec3> lwing1_vertices;
   std::vector<glm::vec3> lwing1_normals;
-  loadOBJ("model/lwing1.obj", lwing1_vertices, lwing1_normals);
+  loadOBJ("./model/lwing1.obj", lwing1_vertices, lwing1_normals);
 
   std::vector<glm::vec3> lwing2_vertices;
   std::vector<glm::vec3> lwing2_normals;
-  loadOBJ("model/lwing2.obj", lwing2_vertices, lwing2_normals);
+  loadOBJ("./model/lwing2.obj", lwing2_vertices, lwing2_normals);
 
   std::vector<glm::vec3> lwing3_vertices;
   std::vector<glm::vec3> lwing3_normals;
-  loadOBJ("model/lwing3.obj", lwing3_vertices, lwing3_normals);
+  loadOBJ("./model/lwing3.obj", lwing3_vertices, lwing3_normals);
 
   // Load it into a VBO
 
@@ -225,13 +223,13 @@ int main( void )
     glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0 );
     glDrawArrays(GL_TRIANGLES, 0, body_vertices.size() );
 
+    // Right wing 1
     glm::mat4 RWing1ModelMatrix = glm::translate(glm::mat4(1.0), glm::vec3(0.13f, 0.84f, 0.46f))
                                   * glm::rotate(glm::mat4(1.0), 0.3f * sin(5.0f * elapsedTime), glm::vec3(0,0,1))
                                   * glm::translate(glm::mat4(1.0), glm::vec3(-0.13f, -0.84f, -0.46f));
     glm::mat4 RWing1MVP = ProjectionMatrix * ViewMatrix * RWing1ModelMatrix;
     glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &RWing1MVP[0][0]);
     glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &RWing1ModelMatrix[0][0]);
-    // Right wing 1
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, rwing1_vertexbuffer);
     glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0 );
@@ -240,6 +238,7 @@ int main( void )
     glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0 );
     glDrawArrays(GL_TRIANGLES, 0, rwing1_vertices.size() );
 
+    // Right wing 2
     glm::mat4 RWing2ModelMatrix = glm::translate(glm::mat4(1.0), glm::vec3(0.0f, 0.0f, 0.97f))
                                   * glm::rotate(glm::mat4(1.0), -0.3f * sin(5.0f * elapsedTime), glm::vec3(0,1,0))
                                   * glm::translate(glm::mat4(1.0), glm::vec3(0.0f, 0.0f, -0.97f))
@@ -247,7 +246,6 @@ int main( void )
     glm::mat4 RWing2MVP = ProjectionMatrix * ViewMatrix * RWing2ModelMatrix;
     glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &RWing2MVP[0][0]);
     glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &RWing2ModelMatrix[0][0]);
-    // Right wing 2
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, rwing2_vertexbuffer);
     glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0 );
