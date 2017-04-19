@@ -1,0 +1,63 @@
+\documentclass[11pt]{oblivoir}
+\usepackage[left=2.5cm,right=2.5cm,top=3cm,bottom=3cm,a4paper]{geometry}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{indentfirst}
+\usepackage{graphicx}
+\usepackage{float}
+
+\title{Computer Graphics hw2}
+\date{2017-04-19}
+\author{2014-18992 DongJin Shin}
+
+\begin{document}
+	
+\maketitle
+
+\section{Recommended Environment}
+
+\begin{itemize}
+\item Linux
+\item Graphic card supports GLSL $\geq$ 3.3
+\item OpenGL $\geq$ 3.0
+\item C++ $\geq$ 6.3.1
+\item CMake $\geq$ 3.7.2
+\end{itemize}
+
+\section{Execution}
+
+\begin{enumerate}
+\item \verb|mkdir build| (At root directory, where \verb|CMakeLists.txt| is contained)
+\item \verb|cd build|
+\item \verb|cmake ..|
+\item \verb|make|
+\item \verb|cd ../hw2/| (Directory should be correct, since it loads \verb|obj| and shader files in relative path)
+\item \verb|./hw2|
+\end{enumerate}
+
+\section{Controls}
+\begin{itemize}
+\item Arrow keys to move camera position
+\item Page Up / Down to dolly in / out
+\item Home / End to zoom in / out
+\item Mouse drag to rotate
+\item Right click to seek
+\item ESC to exit
+\end{itemize}
+
+\section{Description}
+마우스 및 키보드 입력에 따라서, 카메라의 위치와 카메라가 바라보는 지점(= 회전의 중심)이 이동하고 물체는 World Coordiante 상에서 고정되어 있도록 설계하였다.
+
+방향키 입력 시 카메라의 위치와 카메라가 바라보는 지점이 평행하게 방향에 따라 이동하게 된다.
+
+Page up/down 입력 시 카메라의 위치가 바라보는 지점으로 다가가거나 멀어지도록 하여 dolly in/out을 구현하였고,
+Home / End 입력 시 카메라의 위치는 고정시키고 field of view를 변화시켜 보이는 크기가 달라지도록 구현하였다.
+
+마우스 드래그 시 virtual trackball 상에 클릭된 점을 유지하도록 회전을 계산하여 카메라의 위치를 회전시킨다. 자연스럽게 보이도록 하기 위해 up vector 또한 같은 쿼터니온을 사용하여 회전시키도록 구현하였다.
+마우스가 virtual trackball을 벗어나도록 클릭했을 시 trackball 상에서 클릭한 지점과 가장 가까운 점을 선택하여 회전시킨다.
+Virtual trackball을 화면상에서 일정한 크기로 유지하기 위해, 카메라와 중심의 거리와 fov에 따라 world space 상의 trackball의 크기를 변화시키도록 하였다.
+
+마우스 우클릭 시 카메라가 바라보는 지점을 클릭한 지점으로 이동하도록 구현하였다.
+
+관련 구현은 control.cpp에서 확인할 수 있다.
+\end{document}

@@ -36,7 +36,7 @@ int main( void )
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
   // Open a window and create its OpenGL context
-  window = glfwCreateWindow( 1024, 768, "Graphics hw1", NULL, NULL);
+  window = glfwCreateWindow( 1024, 768, "Graphics hw2", NULL, NULL);
   if( window == NULL ){
     fprintf( stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible.\n" );
     getchar();
@@ -77,7 +77,7 @@ int main( void )
   glBindVertexArray(VertexArrayID);
 
   // Create and compile our GLSL program from the shaders
-  GLuint programID = LoadShaders( "/home/lastone817/graphics/hw1/shader/Basic.vert", "/home/lastone817/graphics/hw1/shader/LightShading.frag" );
+  GLuint programID = LoadShaders( "./shader/Basic.vert", "./shader/LightShading.frag" );
 
   // Get a handle for our "MVP" uniform
   GLuint MatrixID = glGetUniformLocation(programID, "MVP");

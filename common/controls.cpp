@@ -209,11 +209,10 @@ void computeMatricesFromInputs(){
     if (glm::length(v1 - v2) > 1.0e-6f) {
       quat q = glm::rotation(glm::normalize(v2), glm::normalize(v1));
       glm::mat4 rotation = toMat4(q);
-      position = glm::vec3(rotation * glm::vec4(init_position, 1.0f));
+      position = glm::vec3(rotation * glm::vec4((init_position - target), 0.0f)) + target;
       top = glm::vec3(rotation * glm::vec4(init_top, 0.0f));
     }
   }
-  printVec3("position", position);
 
   // Projection matrix : 45* Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
   ProjectionMatrix = glm::perspective(glm::radians(FoV), 4.0f / 3.0f, 0.1f, 100.0f);

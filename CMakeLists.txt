@@ -45,11 +45,11 @@ add_definitions(
 
 aux_source_directory(common COMMON_SOURCES)
 
-add_executable(hw1
-        hw1/main.cpp
+add_executable(hw2
+        hw2/main.cpp
         ${COMMON_SOURCES}
         )
-target_link_libraries(hw1
+target_link_libraries(hw2
         ${ALL_LIBS}
         )
 
@@ -57,6 +57,6 @@ SOURCE_GROUP(common REGULAR_EXPRESSION ".*/common/.*" )
 SOURCE_GROUP(shaders REGULAR_EXPRESSION ".*/.*shader$" )
 
 add_custom_command(
-        TARGET hw1 POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/hw1${CMAKE_EXECUTABLE_SUFFIX}" "${CMAKE_CURRENT_SOURCE_DIR}/hw1/"
+        TARGET hw2 POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/hw2${CMAKE_EXECUTABLE_SUFFIX}" "${CMAKE_CURRENT_SOURCE_DIR}/hw2/"
 )
