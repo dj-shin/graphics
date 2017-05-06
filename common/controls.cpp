@@ -39,7 +39,7 @@ void printVec4(const char* name, glm::vec4 v){
 
 // Initial position : on +Z
 // glm::vec3 position = glm::vec3( 3.0f, 5.5f, 3.4f );
-glm::vec3 position = glm::vec3( 10.0f, 0.0f, 0.0f );
+glm::vec3 position = glm::vec3( 100.0f, 0.0f, 0.0f );
 // LookAt target
 glm::vec3 target = glm::vec3(0.0f, 0.0f, 0.0f);
 // Initial Field of View
@@ -47,7 +47,7 @@ float FoV = 45.0f;
 
 glm::vec3 init_position;
 
-float speed = 3.0f; // 3 units / second
+float speed = 30.0f; // 3 units / second
 
 const int clicked = 0;
 const int released = 1;
@@ -113,7 +113,7 @@ static void mouse_button_callback(GLFWwindow* window, int button, int action, in
       glm::vec3 right = glm::normalize(glm::cross(direction, top));
       // Up vector
       glm::vec3 up = glm::cross( right, direction );
-      ProjectionMatrix = glm::perspective(glm::radians(FoV), 4.0f / 3.0f, 0.1f, 100.0f);
+      ProjectionMatrix = glm::perspective(glm::radians(FoV), 4.0f / 3.0f, 0.01f, 1000.0f);
       // Camera matrix
       ViewMatrix       = glm::lookAt(
           position,           // Camera is here
@@ -215,7 +215,7 @@ void computeMatricesFromInputs(){
   }
 
   // Projection matrix : 45* Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
-  ProjectionMatrix = glm::perspective(glm::radians(FoV), 4.0f / 3.0f, 0.1f, 100.0f);
+  ProjectionMatrix = glm::perspective(glm::radians(FoV), 4.0f / 3.0f, 0.01f, 1000.0f);
   // Camera matrix
   ViewMatrix       = glm::lookAt(
       position,           // Camera is here

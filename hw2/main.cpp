@@ -77,7 +77,7 @@ int main( void )
   glBindVertexArray(VertexArrayID);
 
   // Create and compile our GLSL program from the shaders
-  GLuint programID = LoadShaders( "./shader/Basic.vert", "./shader/LightShading.frag" );
+  GLuint programID = LoadShaders( "/home/lastone817/graphics/hw2/shader/Basic.vert", "/home/lastone817/graphics/hw2/shader/LightShading.frag" );
 
   // Get a handle for our "MVP" uniform
   GLuint MatrixID = glGetUniformLocation(programID, "MVP");
@@ -213,6 +213,7 @@ int main( void )
 
     glm::vec3 lightPos = glm::vec3(6,8,0);
     glUniform3f(LightID, lightPos.x, lightPos.y, lightPos.z);
+
 
     // Body
     glEnableVertexAttribArray(0);

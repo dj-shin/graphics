@@ -45,11 +45,11 @@ add_definitions(
 
 aux_source_directory(common COMMON_SOURCES)
 
-add_executable(hw2
-        hw2/main.cpp
+add_executable(hw3
+        hw3/main.cpp
         ${COMMON_SOURCES}
-        )
-target_link_libraries(hw2
+        hw3/surface.h hw3/spline.h)
+target_link_libraries(hw3
         ${ALL_LIBS}
         )
 
@@ -57,6 +57,6 @@ SOURCE_GROUP(common REGULAR_EXPRESSION ".*/common/.*" )
 SOURCE_GROUP(shaders REGULAR_EXPRESSION ".*/.*shader$" )
 
 add_custom_command(
-        TARGET hw2 POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/hw2${CMAKE_EXECUTABLE_SUFFIX}" "${CMAKE_CURRENT_SOURCE_DIR}/hw2/"
+        TARGET hw3 POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/hw3${CMAKE_EXECUTABLE_SUFFIX}" "${CMAKE_CURRENT_SOURCE_DIR}/hw3/"
 )
