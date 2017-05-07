@@ -39,7 +39,7 @@ void printVec4(const char* name, glm::vec4 v){
 
 // Initial position : on +Z
 // glm::vec3 position = glm::vec3( 3.0f, 5.5f, 3.4f );
-glm::vec3 position = glm::vec3( 100.0f, 0.0f, 0.0f );
+glm::vec3 position = glm::vec3( 0.0f, 0.0f, 100.0f );
 // LookAt target
 glm::vec3 target = glm::vec3(0.0f, 0.0f, 0.0f);
 // Initial Field of View

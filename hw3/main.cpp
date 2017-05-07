@@ -73,24 +73,40 @@ int main( void )
   if (init_glfw()) {
     return -1;
   }
-  RawSurface rawSurface = RawSurface::createFromFile("/home/lastone817/graphics/hw3/trombone.txt");
-  // RawSurface rawSurface = RawSurface::createFromFile("/home/lastone817/graphics/hw3/coke_bottle.txt");
+  RawSurface rawSurface = RawSurface::createFromFile("./sample.txt");
   Surface surface = Surface(rawSurface);
 
-  GLfloat *vertices = (GLfloat*)malloc(sizeof(GLfloat) * surface.dataSize());
-  surface.fillVertices(vertices);
+  // GLfloat *vertices = (GLfloat*)malloc(sizeof(GLfloat) * surface.dataSize());
+  // surface.fillVertices(vertices);
+
+  GLfloat *vertices = (GLfloat*)malloc(sizeof(GLfloat) * surface.meshDataSize());
+  surface.fillMeshVertices(vertices);
+
+  GLfloat *normal_vertices = (GLfloat*)malloc(sizeof(GLfloat) * surface.meshDataSize());
+  surface.fillNormalVertices(normal_vertices);
 
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+
+  // Enable depth test
+  glEnable(GL_DEPTH_TEST);
+  // Accept fragment if it closer to the camera than the former one
+  glDepthFunc(GL_LESS);
+
+  // Cull triangles which normal is not towards the camera
+  //glEnable(GL_CULL_FACE);
 
   GLuint vao;
   glGenVertexArrays(1, &vao);
   glBindVertexArray(vao);
 
-  GLuint programID = LoadShaders( "/home/lastone817/graphics/hw3/shader/Basic.vert", "/home/lastone817/graphics/hw3/shader/LightShading.frag" );
+  GLuint programID = LoadShaders( "./shader/Basic.vert", "./shader/LightShading.frag" );
 
   // Get a handle for our "MVP" uniform
   GLuint MatrixID = glGetUniformLocation(programID, "MVP");
+  GLuint ViewMatrixID = glGetUniformLocation(programID, "V");
+  GLuint ModelMatrixID = glGetUniformLocation(programID, "M");
 
+  /*
   GLuint* bspline_vbo = (GLuint*)malloc(sizeof(GLuint) * surface.section_count());
   glGenBuffers(surface.section_count(), bspline_vbo);
   for (int i = 0; i < surface.section_count(); ++i) {
@@ -100,8 +116,26 @@ int main( void )
                  &vertices[surface.per_section_point_count() * 3 * i],
                  GL_STATIC_DRAW);
   }
+   */
+  GLuint bspline_vbo;
+  glGenBuffers(1, &bspline_vbo);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bspline_vbo);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+               sizeof(GLfloat) * surface.meshDataSize(),
+               &vertices[0],
+               GL_STATIC_DRAW);
 
+  GLuint bspline_normal;
+  glGenBuffers(1, &bspline_normal);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bspline_normal);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+               sizeof(GLfloat) * surface.meshDataSize(),
+               &normal_vertices[0],
+               GL_STATIC_DRAW);
+
+  // Get a handle for our "LightPosition" uniform
   glUseProgram(programID);
+  GLuint LightID = glGetUniformLocation(programID, "LightPosition_worldspace");
 
   double initTime = glfwGetTime();
   do{
@@ -121,14 +155,29 @@ int main( void )
     // Send our transformation to the currently bound shader,
     // in the "BodyMVP" uniform
     glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &BodyMVP[0][0]);
+    glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &BodyModelMatrix[0][0]);
+    glUniformMatrix4fv(ViewMatrixID, 1, GL_FALSE, &ViewMatrix[0][0]);
+
+    glm::vec3 lightPos = glm::vec3(-80,0,0);
+    glUniform3f(LightID, lightPos.x, lightPos.y, lightPos.z);
 
     glEnableVertexAttribArray(0);
     // Bspline
+    /*
     for (int i = 0; i < surface.section_count(); ++i) {
       glBindBuffer(GL_ARRAY_BUFFER, bspline_vbo[i]);
       glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
       glDrawArrays(GL_LINE_LOOP, 0, surface.per_section_point_count());
     }
+    */
+    glBindBuffer(GL_ARRAY_BUFFER, bspline_vbo);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+    glEnableVertexAttribArray(1);
+    glBindBuffer(GL_ARRAY_BUFFER, bspline_normal);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+    glDrawArrays(GL_TRIANGLES, 0, surface.meshDataSize() / 3);
 
     glDisableVertexAttribArray(0);
 
