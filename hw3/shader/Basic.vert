@@ -8,13 +8,17 @@ layout(location = 1) in vec3 vertexNormal_modelspace;
 out vec3 Position_worldspace;
 out vec3 Normal_cameraspace;
 out vec3 EyeDirection_cameraspace;
-out vec3 LightDirection_cameraspace;
+out vec3 LightDirection_cameraspace1;
+out vec3 LightDirection_cameraspace2;
+out vec3 LightDirection_cameraspace3;
 
 // Values that stay constant for the whole mesh.
 uniform mat4 MVP;
 uniform mat4 V;
 uniform mat4 M;
-uniform vec3 LightPosition_worldspace;
+uniform vec3 LightPosition_worldspace1;
+uniform vec3 LightPosition_worldspace2;
+uniform vec3 LightPosition_worldspace3;
 
 void main(){
 
@@ -30,8 +34,12 @@ void main(){
 	EyeDirection_cameraspace = vec3(0,0,0) - vertexPosition_cameraspace;
 
 	// Vector that goes from the vertex to the light, in camera space. M is ommited because it's identity.
-	vec3 LightPosition_cameraspace = ( V * vec4(LightPosition_worldspace,1)).xyz;
-	LightDirection_cameraspace = LightPosition_cameraspace + EyeDirection_cameraspace;
+	vec3 LightPosition_cameraspace1 = ( V * vec4(LightPosition_worldspace1,1)).xyz;
+	LightDirection_cameraspace1 = LightPosition_cameraspace1 + EyeDirection_cameraspace;
+	vec3 LightPosition_cameraspace2 = ( V * vec4(LightPosition_worldspace2,1)).xyz;
+	LightDirection_cameraspace2 = LightPosition_cameraspace2 + EyeDirection_cameraspace;
+	vec3 LightPosition_cameraspace3 = ( V * vec4(LightPosition_worldspace3,1)).xyz;
+	LightDirection_cameraspace3 = LightPosition_cameraspace3 + EyeDirection_cameraspace;
 
 	// Normal of the the vertex, in camera space
 	Normal_cameraspace = ( V * M * vec4(vertexNormal_modelspace,0)).xyz; // Only correct if ModelMatrix does not scale the model ! Use its inverse transpose if not.

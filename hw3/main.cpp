@@ -19,6 +19,7 @@ using namespace glm;
 #include <common/controls.hpp>
 
 #include "surface.h"
+#include "bsp.h"
 
 int init_glfw() {
   // Initialise GLFW
@@ -73,11 +74,8 @@ int main( void )
   if (init_glfw()) {
     return -1;
   }
-  RawSurface rawSurface = RawSurface::createFromFile("./sample.txt");
+  RawSurface rawSurface = RawSurface::createFromFile("/home/lastone817/graphics/hw3/knight.txt");
   Surface surface = Surface(rawSurface);
-
-  // GLfloat *vertices = (GLfloat*)malloc(sizeof(GLfloat) * surface.dataSize());
-  // surface.fillVertices(vertices);
 
   GLfloat *vertices = (GLfloat*)malloc(sizeof(GLfloat) * surface.meshDataSize());
   surface.fillMeshVertices(vertices);
@@ -87,36 +85,18 @@ int main( void )
 
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
-  // Enable depth test
-  glEnable(GL_DEPTH_TEST);
-  // Accept fragment if it closer to the camera than the former one
-  glDepthFunc(GL_LESS);
-
-  // Cull triangles which normal is not towards the camera
-  //glEnable(GL_CULL_FACE);
-
   GLuint vao;
   glGenVertexArrays(1, &vao);
   glBindVertexArray(vao);
 
-  GLuint programID = LoadShaders( "./shader/Basic.vert", "./shader/LightShading.frag" );
+  GLuint programID = LoadShaders( "/home/lastone817/graphics/hw3/shader/Basic.vert", "/home/lastone817/graphics/hw3/shader/LightShading.frag" );
 
   // Get a handle for our "MVP" uniform
   GLuint MatrixID = glGetUniformLocation(programID, "MVP");
   GLuint ViewMatrixID = glGetUniformLocation(programID, "V");
   GLuint ModelMatrixID = glGetUniformLocation(programID, "M");
 
-  /*
-  GLuint* bspline_vbo = (GLuint*)malloc(sizeof(GLuint) * surface.section_count());
-  glGenBuffers(surface.section_count(), bspline_vbo);
-  for (int i = 0; i < surface.section_count(); ++i) {
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *(bspline_vbo + i));
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-                 sizeof(GLfloat) * surface.per_section_point_count() * 3,
-                 &vertices[surface.per_section_point_count() * 3 * i],
-                 GL_STATIC_DRAW);
-  }
-   */
+  // Opaque object
   GLuint bspline_vbo;
   glGenBuffers(1, &bspline_vbo);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bspline_vbo);
@@ -133,9 +113,132 @@ int main( void )
                &normal_vertices[0],
                GL_STATIC_DRAW);
 
+  std::vector<Polygon> cube;
+
+  cube.push_back(
+      Polygon(std::vector<glm::vec3>{
+          glm::vec3(13.0f, 16.0f,  8.0f),
+          glm::vec3(13.0f, -0.0f,  8.0f),
+          glm::vec3(13.0f, -0.0f, -8.0f),
+          glm::vec3(13.0f, 16.0f, -8.0f)
+      }));
+  cube.push_back(
+      Polygon(std::vector<glm::vec3>{
+          glm::vec3(-3.0f, 16.0f,  8.0f),
+          glm::vec3(-3.0f, 16.0f, -8.0f),
+          glm::vec3(-3.0f, -0.0f, -8.0f),
+          glm::vec3(-3.0f, -0.0f,  8.0f)
+      }));
+  cube.push_back(
+      Polygon(std::vector<glm::vec3>{
+          glm::vec3(13.0f, 16.0f,  8.0f),
+          glm::vec3(13.0f, 16.0f, -8.0f),
+          glm::vec3(-3.0f, 16.0f, -8.0f),
+          glm::vec3(-3.0f, 16.0f,  8.0f)
+      }));
+  cube.push_back(
+      Polygon(std::vector<glm::vec3>{
+          glm::vec3(13.0f, -0.0f,  8.0f),
+          glm::vec3(-3.0f, -0.0f,  8.0f),
+          glm::vec3(-3.0f, -0.0f, -8.0f),
+          glm::vec3(13.0f, -0.0f, -8.0f)
+      }));
+  cube.push_back(
+      Polygon(std::vector<glm::vec3>{
+          glm::vec3(13.0f, 16.0f,  8.0f),
+          glm::vec3(-3.0f, 16.0f,  8.0f),
+          glm::vec3(-3.0f, -0.0f,  8.0f),
+          glm::vec3(13.0f, -0.0f,  8.0f)
+      }));
+  cube.push_back(
+      Polygon(std::vector<glm::vec3>{
+          glm::vec3(13.0f, 16.0f, -8.0f),
+          glm::vec3(13.0f, -0.0f, -8.0f),
+          glm::vec3(-3.0f, -0.0f, -8.0f),
+          glm::vec3(-3.0f, 16.0f, -8.0f)
+      }));
+
+  /*
+  GLfloat cube_vertices[] = {
+      13.0f, 16.0f, 8.0f,
+      13.0f, -0.0f, 8.0f,
+      -3.0f, -0.0f, 8.0f,
+      -3.0f, 16.0f, 8.0f,
+
+      -3.0f, 16.0f, -8.0f,
+      -3.0f, -0.0f, -8.0f,
+      13.0f, -0.0f, -8.0f,
+      13.0f, 16.0f, -8.0f
+  };
+
+  GLuint cube_indices[] = {
+      0, 1, 2,
+      0, 2, 3,
+      0, 1, 6,
+      6, 7, 0,
+      1, 2, 5,
+      5, 6, 1,
+      2, 3, 4,
+      4, 5, 2,
+      0, 3, 4,
+      4, 7, 0,
+      4, 5, 6,
+      6, 7, 4
+  };
+
+  GLfloat cube_normals[] = {
+      1.0f, 1.0f, 1.0f,
+      1.0f, -1.0f, 1.0f,
+      -1.0f, -1.0f, 1.0f,
+      -1.0f, 1.0f, 1.0f,
+
+      -1.0f, 1.0f, -1.0f,
+      -1.0f, -1.0f, -1.0f,
+      1.0f, -1.0f, -1.0f,
+      1.0f, 1.0f, -1.0f
+  };
+  // Translucent cube
+  GLuint cube_vertex_vbo;
+  glGenBuffers(1, &cube_vertex_vbo);
+  glBindBuffer(GL_ARRAY_BUFFER, cube_vertex_vbo);
+  glBufferData(GL_ARRAY_BUFFER,
+               sizeof(cube_vertices),
+               &cube_vertices[0],
+               GL_STATIC_DRAW);
+
+  GLuint cube_index_vbo;
+  glGenBuffers(1, &cube_index_vbo);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cube_index_vbo);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+               sizeof(cube_indices),
+               &cube_indices[0],
+               GL_STATIC_DRAW);
+
+  GLuint cube_normal_vbo;
+  glGenBuffers(1, &cube_normal_vbo);
+  glBindBuffer(GL_ARRAY_BUFFER, cube_normal_vbo);
+  glBufferData(GL_ARRAY_BUFFER,
+               sizeof(cube_normals),
+               &cube_normals[0],
+               GL_STATIC_DRAW);
+   */
+
+  BSPTree cube_bsp = BSPTree(cube);
+
   // Get a handle for our "LightPosition" uniform
   glUseProgram(programID);
-  GLuint LightID = glGetUniformLocation(programID, "LightPosition_worldspace");
+  GLuint LightID1 = glGetUniformLocation(programID, "LightPosition_worldspace1");
+  GLuint LightID2 = glGetUniformLocation(programID, "LightPosition_worldspace2");
+  GLuint LightID3 = glGetUniformLocation(programID, "LightPosition_worldspace3");
+  GLuint ColorID = glGetUniformLocation(programID, "material_color");
+
+  // Enable depth test
+  glEnable(GL_DEPTH_TEST);
+  // Accept fragment if it closer to the camera than the former one
+  glDepthFunc(GL_LESS);
+
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   double initTime = glfwGetTime();
   do{
@@ -158,18 +261,14 @@ int main( void )
     glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &BodyModelMatrix[0][0]);
     glUniformMatrix4fv(ViewMatrixID, 1, GL_FALSE, &ViewMatrix[0][0]);
 
-    glm::vec3 lightPos = glm::vec3(-80,0,0);
-    glUniform3f(LightID, lightPos.x, lightPos.y, lightPos.z);
+    glUniform3f(LightID1, 20.0f, 0.0f, 60.0f);
+    glUniform3f(LightID2, -19.0f, -16.0f, -16.0f);
+    glUniform3f(LightID3, -30.0f, 20.0f, -70.0f);
+
+    glm::vec4 knightColor = glm::vec4(1,1,1,1);
+    glUniform4f(ColorID, knightColor.x, knightColor.y, knightColor.z, knightColor.w);
 
     glEnableVertexAttribArray(0);
-    // Bspline
-    /*
-    for (int i = 0; i < surface.section_count(); ++i) {
-      glBindBuffer(GL_ARRAY_BUFFER, bspline_vbo[i]);
-      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-      glDrawArrays(GL_LINE_LOOP, 0, surface.per_section_point_count());
-    }
-    */
     glBindBuffer(GL_ARRAY_BUFFER, bspline_vbo);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
@@ -178,8 +277,30 @@ int main( void )
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
     glDrawArrays(GL_TRIANGLES, 0, surface.meshDataSize() / 3);
+    glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(1);
+
+    glm::vec4 cubeColor = glm::vec4(0,1,0,0.5f);
+    glUniform4f(ColorID, cubeColor.x, cubeColor.y, cubeColor.z, cubeColor.w);
+
+    /*
+    // Translucent Cube
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, cube_vertex_vbo);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+    glEnableVertexAttribArray(1);
+    glBindBuffer(GL_ARRAY_BUFFER, cube_normal_vbo);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cube_index_vbo);
+    glDrawElements(GL_TRIANGLES, sizeof(cube_indices) / sizeof(GLuint), GL_UNSIGNED_INT, (void*)0);
 
     glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(1);
+     */
+    glm::vec3 v = getEye();
+    cube_bsp.draw(v);
 
     // Swap buffers
     glfwSwapBuffers(window);

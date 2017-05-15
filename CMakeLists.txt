@@ -48,7 +48,7 @@ aux_source_directory(common COMMON_SOURCES)
 add_executable(hw3
         hw3/main.cpp
         ${COMMON_SOURCES}
-        hw3/surface.h hw3/spline.h)
+        hw3/surface.h hw3/spline.h hw3/bsp.h)
 target_link_libraries(hw3
         ${ALL_LIBS}
         )

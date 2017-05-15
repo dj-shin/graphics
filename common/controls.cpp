@@ -39,7 +39,7 @@ void printVec4(const char* name, glm::vec4 v){
 
 // Initial position : on +Z
 // glm::vec3 position = glm::vec3( 3.0f, 5.5f, 3.4f );
-glm::vec3 position = glm::vec3( 0.0f, 0.0f, 100.0f );
+glm::vec3 position = glm::vec3( 0.0f, 0.0f, 40.0f );
 // LookAt target
 glm::vec3 target = glm::vec3(0.0f, 0.0f, 0.0f);
 // Initial Field of View
@@ -55,6 +55,10 @@ static int state = released;
 double init_xpos, init_ypos;
 
 glm::vec3 v1;
+
+glm::vec3 getEye() {
+  return position;
+}
 
 glm::vec3 screen2ball(double xpos, double ypos, int width, int height, glm::vec3 pos)
 {
