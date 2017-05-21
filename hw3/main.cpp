@@ -17,6 +17,7 @@ using namespace glm;
 
 #include <common/shader.hpp>
 #include <common/controls.hpp>
+#include <common/objloader.hpp>
 
 #include "surface.h"
 #include "bsp.h"
@@ -115,115 +116,55 @@ int main( void )
 
   std::vector<Polygon> cube;
 
-  cube.push_back(
-      Polygon(std::vector<glm::vec3>{
+  auto f1 = std::vector<glm::vec3>{
           glm::vec3(13.0f, 16.0f,  8.0f),
           glm::vec3(13.0f, -0.0f,  8.0f),
           glm::vec3(13.0f, -0.0f, -8.0f),
           glm::vec3(13.0f, 16.0f, -8.0f)
-      }));
-  cube.push_back(
-      Polygon(std::vector<glm::vec3>{
+      };
+  auto f2 = std::vector<glm::vec3>{
           glm::vec3(-3.0f, 16.0f,  8.0f),
           glm::vec3(-3.0f, 16.0f, -8.0f),
           glm::vec3(-3.0f, -0.0f, -8.0f),
           glm::vec3(-3.0f, -0.0f,  8.0f)
-      }));
-  cube.push_back(
-      Polygon(std::vector<glm::vec3>{
+      };
+  auto f3 = std::vector<glm::vec3>{
           glm::vec3(13.0f, 16.0f,  8.0f),
           glm::vec3(13.0f, 16.0f, -8.0f),
           glm::vec3(-3.0f, 16.0f, -8.0f),
           glm::vec3(-3.0f, 16.0f,  8.0f)
-      }));
-  cube.push_back(
-      Polygon(std::vector<glm::vec3>{
+      };
+  auto f4 = std::vector<glm::vec3>{
           glm::vec3(13.0f, -0.0f,  8.0f),
           glm::vec3(-3.0f, -0.0f,  8.0f),
           glm::vec3(-3.0f, -0.0f, -8.0f),
           glm::vec3(13.0f, -0.0f, -8.0f)
-      }));
-  cube.push_back(
-      Polygon(std::vector<glm::vec3>{
+      };
+  auto f5 = std::vector<glm::vec3>{
           glm::vec3(13.0f, 16.0f,  8.0f),
           glm::vec3(-3.0f, 16.0f,  8.0f),
           glm::vec3(-3.0f, -0.0f,  8.0f),
           glm::vec3(13.0f, -0.0f,  8.0f)
-      }));
-  cube.push_back(
-      Polygon(std::vector<glm::vec3>{
+      };
+  auto f6 = std::vector<glm::vec3>{
           glm::vec3(13.0f, 16.0f, -8.0f),
           glm::vec3(13.0f, -0.0f, -8.0f),
           glm::vec3(-3.0f, -0.0f, -8.0f),
           glm::vec3(-3.0f, 16.0f, -8.0f)
-      }));
-
-  /*
-  GLfloat cube_vertices[] = {
-      13.0f, 16.0f, 8.0f,
-      13.0f, -0.0f, 8.0f,
-      -3.0f, -0.0f, 8.0f,
-      -3.0f, 16.0f, 8.0f,
-
-      -3.0f, 16.0f, -8.0f,
-      -3.0f, -0.0f, -8.0f,
-      13.0f, -0.0f, -8.0f,
-      13.0f, 16.0f, -8.0f
-  };
-
-  GLuint cube_indices[] = {
-      0, 1, 2,
-      0, 2, 3,
-      0, 1, 6,
-      6, 7, 0,
-      1, 2, 5,
-      5, 6, 1,
-      2, 3, 4,
-      4, 5, 2,
-      0, 3, 4,
-      4, 7, 0,
-      4, 5, 6,
-      6, 7, 4
-  };
-
-  GLfloat cube_normals[] = {
-      1.0f, 1.0f, 1.0f,
-      1.0f, -1.0f, 1.0f,
-      -1.0f, -1.0f, 1.0f,
-      -1.0f, 1.0f, 1.0f,
-
-      -1.0f, 1.0f, -1.0f,
-      -1.0f, -1.0f, -1.0f,
-      1.0f, -1.0f, -1.0f,
-      1.0f, 1.0f, -1.0f
-  };
-  // Translucent cube
-  GLuint cube_vertex_vbo;
-  glGenBuffers(1, &cube_vertex_vbo);
-  glBindBuffer(GL_ARRAY_BUFFER, cube_vertex_vbo);
-  glBufferData(GL_ARRAY_BUFFER,
-               sizeof(cube_vertices),
-               &cube_vertices[0],
-               GL_STATIC_DRAW);
-
-  GLuint cube_index_vbo;
-  glGenBuffers(1, &cube_index_vbo);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cube_index_vbo);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-               sizeof(cube_indices),
-               &cube_indices[0],
-               GL_STATIC_DRAW);
-
-  GLuint cube_normal_vbo;
-  glGenBuffers(1, &cube_normal_vbo);
-  glBindBuffer(GL_ARRAY_BUFFER, cube_normal_vbo);
-  glBufferData(GL_ARRAY_BUFFER,
-               sizeof(cube_normals),
-               &cube_normals[0],
-               GL_STATIC_DRAW);
-   */
+      };
+  cube.push_back(Polygon(f1));
+  cube.push_back(Polygon(f2));
+  cube.push_back(Polygon(f3));
+  cube.push_back(Polygon(f4));
+  cube.push_back(Polygon(f5));
+  cube.push_back(Polygon(f6));
 
   BSPTree cube_bsp = BSPTree(cube);
+
+  std::vector<glm::vec3> test_vertices;
+  std::vector<glm::vec3> test_normals;
+  loadOBJ("/home/lastone817/graphics/hw3/polygon.obj", test_vertices, test_normals);
+  BSPTree test_bsp = BSPTree(test_vertices);
 
   // Get a handle for our "LightPosition" uniform
   glUseProgram(programID);
@@ -265,6 +206,7 @@ int main( void )
     glUniform3f(LightID2, -19.0f, -16.0f, -16.0f);
     glUniform3f(LightID3, -30.0f, 20.0f, -70.0f);
 
+    /*
     glm::vec4 knightColor = glm::vec4(1,1,1,1);
     glUniform4f(ColorID, knightColor.x, knightColor.y, knightColor.z, knightColor.w);
 
@@ -279,28 +221,14 @@ int main( void )
     glDrawArrays(GL_TRIANGLES, 0, surface.meshDataSize() / 3);
     glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);
+    */
 
-    glm::vec4 cubeColor = glm::vec4(0,1,0,0.5f);
+    glm::vec4 cubeColor = glm::vec4(1,1,1,0.5f);
     glUniform4f(ColorID, cubeColor.x, cubeColor.y, cubeColor.z, cubeColor.w);
 
-    /*
-    // Translucent Cube
-    glEnableVertexAttribArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, cube_vertex_vbo);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-
-    glEnableVertexAttribArray(1);
-    glBindBuffer(GL_ARRAY_BUFFER, cube_normal_vbo);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cube_index_vbo);
-    glDrawElements(GL_TRIANGLES, sizeof(cube_indices) / sizeof(GLuint), GL_UNSIGNED_INT, (void*)0);
-
-    glDisableVertexAttribArray(0);
-    glDisableVertexAttribArray(1);
-     */
     glm::vec3 v = getEye();
-    cube_bsp.draw(v);
+    // cube_bsp.draw(v);
+    test_bsp.draw(v);
 
     // Swap buffers
     glfwSwapBuffers(window);

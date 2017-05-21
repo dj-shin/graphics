@@ -11,14 +11,17 @@ using namespace std;
 
 #include <GL/glew.h>
 
+#define FLT_EPSILON 1.0e-5f
+#define EQUAL(x,y) (glm::all(glm::lessThan(glm::abs((x) - (y)), glm::vec3(FLT_EPSILON))))
+
 class Polygon {
     // Simple, convex polygon
 public:
     vector<glm::vec3> points;
     glm::vec3 normal;
 
-    Polygon(vector<glm::vec3>);
-    vector<Polygon> slice(glm::vec3 point, glm::vec3 normal);
+    Polygon(vector<glm::vec3>&);
+    vector<Polygon> slice(glm::vec3 & point, glm::vec3 & normal);
     vector<Polygon> slice(Polygon& plane);
     bool isFront(Polygon& other) const;
     bool isBehind(Polygon& other) const;
@@ -30,9 +33,24 @@ public:
  * Initializing Polygon with vertices
  * @param point
  */
-Polygon::Polygon(vector<glm::vec3> point) {
+Polygon::Polygon(vector<glm::vec3> & point) {
+  if (point.size() < 3) throw -1;
   this->points.clear();
-  assert(point.size() >= 3);
+  size_t size = point.size();
+  printf("%d\n", point.size());
+  for(auto const& p: point) {
+    printf("%s\n", glm::to_string(p).c_str());
+  }
+  printf("\n");
+
+  for (int i = 0; i < size; ++i) {
+    if (EQUAL(point[i], point[(i+1) % size])) {
+      point.erase(point.begin() + i);
+      i--;
+      size--;
+    }
+  }
+  if (point.size() < 3) throw -1;
   glm::vec3 e1 = point[1] - point[0];
   glm::vec3 e2 = point[2] - point[1];
   normal = glm::normalize(glm::cross(e1, e2));
@@ -42,7 +60,7 @@ Polygon::Polygon(vector<glm::vec3> point) {
     glm::vec3 eb = point[(i + 2) % point.size()] - point[(i + 1) % point.size()];
     glm::vec3 n = glm::normalize(glm::cross(ea, eb));
     // Check all points are on same plane
-    assert(glm::all(glm::equal(n, normal)));
+    assert(EQUAL(n, normal));
   }
   for(auto const& p: point) {
     this->points.push_back(p);
@@ -55,7 +73,7 @@ Polygon::Polygon(vector<glm::vec3> point) {
  * @param normal
  * @return
  */
-vector<Polygon> Polygon::slice(glm::vec3 p, glm::vec3 n) {
+vector<Polygon> Polygon::slice(glm::vec3 & p, glm::vec3 & n) {
   vector<Polygon> result;
   vector<glm::vec3> polygon[2];
   int pidx = 0;
@@ -63,7 +81,7 @@ vector<Polygon> Polygon::slice(glm::vec3 p, glm::vec3 n) {
     auto p1 = points[i];
     auto p2 = points[(i+1) % points.size()];
 
-    polygon[pidx].push_back(p1);
+    polygon[pidx % 2].push_back(p1);
     if (glm::dot(p1 - p, n) * glm::dot(p2 - p, n) < 0.0f) {
       float s = glm::dot(n, p - p1) / glm::dot(n, p2 - p1);
       glm::vec3 pi = p1 + s * (p2 - p1);
@@ -72,9 +90,15 @@ vector<Polygon> Polygon::slice(glm::vec3 p, glm::vec3 n) {
       polygon[pidx % 2].push_back(pi);
     }
   }
-  result.push_back(Polygon(polygon[0]));
+  try {
+    result.push_back(Polygon(polygon[0]));
+  }
+  catch (int _) { }
   if (pidx != 0) {
-    result.push_back(Polygon(polygon[1]));
+    try {
+      result.push_back(Polygon(polygon[1]));
+    }
+    catch (int _) { }
   }
   return result;
 }
@@ -85,23 +109,25 @@ vector<Polygon> Polygon::slice(Polygon &plane) {
 
 bool Polygon::isFront(Polygon &other) const {
   // Is this in front of (on normal side) other
-  for (auto const& p: points) {
-    if (glm::dot(p - other.points[0], other.normal) < 0.0f) return false;
+  for (glm::vec3 p: points) {
+    float direction = glm::dot(p - other.points[0], other.normal);
+    if (direction < -FLT_EPSILON) return false;
   }
   return true;
 }
 
 bool Polygon::isBehind(Polygon &other) const {
   // Is this behind (on opposite of normal side) other
-  for (auto const& p: points) {
-    if (glm::dot(p - other.points[0], other.normal) > 0.0f) return false;
+  for (glm::vec3 p: points) {
+    float direction = glm::dot(p - other.points[0], other.normal);
+    if (direction > FLT_EPSILON) return false;
   }
   return true;
 }
 
 bool Polygon::isOnSamePlane(Polygon &other) const {
   if (isFront(other) || isBehind(other)) return false;
-  return glm::all(glm::equal(normal, other.normal));
+  return EQUAL(normal, other.normal);
 }
 
 void Polygon::draw() const {
@@ -131,6 +157,8 @@ void Polygon::draw() const {
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
   glDrawArrays(GL_TRIANGLE_FAN, 0, points.size());
+  glDisableVertexAttribArray(0);
+  glDisableVertexAttribArray(1);
 }
 
 class BSPNode {
@@ -182,15 +210,21 @@ BSPNode::BSPNode(std::vector<Polygon> polygons) {
     else {
       // Split it into two polygons
       std::vector<Polygon> split = polygons[i].slice(p);
-      if (split[0].isFront(p) && split[1].isBehind(p)) {
-        front.push_back(split[0]);
-        behind.push_back(split[1]);
+      if (split.size() == 2) {
+        if (split[0].isFront(p) && split[1].isBehind(p)) {
+          front.push_back(split[0]);
+          behind.push_back(split[1]);
+        } else if (split[1].isFront(p) && split[0].isBehind(p)) {
+          front.push_back(split[1]);
+          behind.push_back(split[0]);
+        } else
+          assert(false);
       }
-      else if (split[1].isFront(p) && split[0].isBehind(p)) {
-        front.push_back(split[1]);
-        behind.push_back(split[0]);
+      else {
+        if (split[0].isFront(p)) front.push_back(split[0]);
+        else if (split[0].isBehind(p)) behind.push_back(split[0]);
+        else this->polygons.push_back(split[0]);
       }
-      else assert(false);
     }
   }
   if (!front.empty()) {
@@ -209,12 +243,12 @@ BSPNode::BSPNode(std::vector<Polygon> polygons) {
 
 bool BSPNode::isFront(glm::vec3 &p) const {
   // Is this p in front of (on normal side) this
-  return (glm::dot(p - point, normal) > 0.0f);
+  return ((float)glm::dot(p - point, normal) > FLT_EPSILON);
 }
 
 bool BSPNode::isBehind(glm::vec3 &p) const {
   // Is this p in front of (on normal side) this
-  return (glm::dot(p - point, normal) < 0.0f);
+  return ((float)glm::dot(p - point, normal) < -FLT_EPSILON);
 }
 
 void BSPNode::draw(glm::vec3 v) {
@@ -248,12 +282,26 @@ class BSPTree {
     node_ptr root;
 public:
     BSPTree(std::vector<Polygon> polygons);
+    BSPTree(std::vector<glm::vec3> & vertices);
     void print();
     void draw(glm::vec3);
 };
 
 BSPTree::BSPTree(std::vector<Polygon> polygons) {
   assert(!polygons.empty());
+  root = std::make_unique<BSPNode>(BSPNode(polygons));
+}
+
+BSPTree::BSPTree(std::vector<glm::vec3> & vertices) {
+  assert(vertices.size() % 3 == 0);
+  std::vector<Polygon> polygons;
+  for (int i = 0; i < vertices.size() / 3; ++i) {
+    std::vector<glm::vec3> points;
+    for (int j = 0; j < 3; ++j) {
+      points.push_back(vertices[i * 3 + j]);
+    }
+    polygons.push_back(Polygon(points));
+  }
   root = std::make_unique<BSPNode>(BSPNode(polygons));
 }
 

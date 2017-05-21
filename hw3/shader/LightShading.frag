@@ -20,7 +20,9 @@ uniform vec4 material_color;
 
 void main(){
 
-	vec3 LightColor = vec3(1,1,1);
+	vec3 LightColor1 = vec3(1,0,0);
+	vec3 LightColor2 = vec3(0,1,0);
+	vec3 LightColor3 = vec3(0,0,1);
 	float LightPower = 2500.0f;
 
 	vec3 MaterialDiffuseColor = material_color.xyz;
@@ -51,11 +53,11 @@ void main(){
 
 	color.rgb =
 		MaterialAmbientColor +
-		MaterialDiffuseColor * LightColor * LightPower * cosTheta1 / (distance1*distance1) +
-		MaterialDiffuseColor * LightColor * LightPower * cosTheta2 / (distance2*distance2) +
-		MaterialDiffuseColor * LightColor * LightPower * cosTheta3 / (distance3*distance3) +
-		MaterialSpecularColor * LightColor * LightPower * pow(cosAlpha1,5) / (distance1*distance1) +
-		MaterialSpecularColor * LightColor * LightPower * pow(cosAlpha2,5) / (distance2*distance2) +
-		MaterialSpecularColor * LightColor * LightPower * pow(cosAlpha3,5) / (distance3*distance3);
+		MaterialDiffuseColor * LightColor1 * LightPower * cosTheta1 / (distance1*distance1) +
+		MaterialDiffuseColor * LightColor2 * LightPower * cosTheta2 / (distance2*distance2) +
+		MaterialDiffuseColor * LightColor3 * LightPower * cosTheta3 / (distance3*distance3) +
+		MaterialSpecularColor * LightColor1 * LightPower * pow(cosAlpha1,5) / (distance1*distance1) +
+		MaterialSpecularColor * LightColor2 * LightPower * pow(cosAlpha2,5) / (distance2*distance2) +
+		MaterialSpecularColor * LightColor3 * LightPower * pow(cosAlpha3,5) / (distance3*distance3);
 	color.a =  material_color.w;
 }
